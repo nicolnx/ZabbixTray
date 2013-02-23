@@ -312,10 +312,16 @@ namespace ZabbixTray
             {
                 foreach (Trigger tr in zApi.triggers)
                 {
-                    string host = tr.host.ToString();
+                    string host = "Unknown Host";
+                    if (tr.host != null)
+                    {
+                        host = tr.host.ToString();
+                    }
                     string issue = tr.description;
                     string priority = priorityValues[Int32.Parse(tr.priority)].ToString();
                     DateTime lastchange = tr.lastchangeDateTime;
+                    string value = tr.value;
+                    string id = tr.triggerid;
                     dtTriggers.Rows.Add(host, issue, priority, lastchange);
                 }
             }
@@ -554,6 +560,11 @@ namespace ZabbixTray
             tbDebug.Text = temp;
             tbDebug.SelectionStart = tbDebug.Text.Length;
             tbDebug.ScrollToCaret();
+        }
+
+        private void dgvTriggers_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }

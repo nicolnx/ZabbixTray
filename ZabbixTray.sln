@@ -1,9 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual C# Express 2010
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZabbixTray", "ZabbixTray.csproj", "{6634604D-0A90-4DC1-9AB6-F2902B6B72E3}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ZabbixAPI", "ZabbixAPI.csproj", "{301B6E7E-ADDC-4D12-91FC-F828932B53BB}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "ZabbixTraySetup", "ZabbixTraySetup\ZabbixTraySetup.vdproj", "{2D51A0B4-0437-4644-8764-8713A078429E}"
+	ProjectSection(ProjectDependencies) = postProject
+		{301B6E7E-ADDC-4D12-91FC-F828932B53BB} = {301B6E7E-ADDC-4D12-91FC-F828932B53BB}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,6 +24,10 @@ Global
 		{301B6E7E-ADDC-4D12-91FC-F828932B53BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{301B6E7E-ADDC-4D12-91FC-F828932B53BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{301B6E7E-ADDC-4D12-91FC-F828932B53BB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2D51A0B4-0437-4644-8764-8713A078429E}.Debug|Any CPU.ActiveCfg = Debug
+		{2D51A0B4-0437-4644-8764-8713A078429E}.Debug|Any CPU.Build.0 = Debug
+		{2D51A0B4-0437-4644-8764-8713A078429E}.Release|Any CPU.ActiveCfg = Release
+		{2D51A0B4-0437-4644-8764-8713A078429E}.Release|Any CPU.Build.0 = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

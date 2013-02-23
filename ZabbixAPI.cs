@@ -29,6 +29,7 @@ namespace Zabbix
         private JavaScriptSerializer serializer = new JavaScriptSerializer();
         private int sleep = 5000;
         private int hideAck = 0;
+        private string _apiVersion;
         #endregion
 
         #region Public section
@@ -129,7 +130,6 @@ namespace Zabbix
                 authenticated = login();
             }
 
-//            getHostgroups();
             getHosts();
             getTriggers();
 
@@ -161,7 +161,8 @@ namespace Zabbix
             string result = CallAPI("apiinfo.version", null);
             try
             {
-                return (serializer.Deserialize<simpleresult>(result)).result;
+                _apiVersion = (serializer.Deserialize<simpleresult>(result)).result;
+                return _apiVersion;
             }
             catch(Exception ex)
             {
@@ -186,6 +187,82 @@ namespace Zabbix
             }
         }
 
+        private object getTriggerReqParams(int hideAck)
+        {
+            var parm = new object { };
+            if (_apiVersion == "1.3")
+            {
+                if (hideAck == 1)
+                {
+                    parm = new
+                    {
+                        output = "extend",
+                        select_hosts = "extend",
+                        monitored = "1",
+                        only_true = "1",
+                        sortfield = "lastchange",
+                        expandDescription = "1",
+                        maintenance = "0",
+                        min_severity = minSeverity,
+                        filter = new { value = "1" },
+                        withLastEventUnacknowledged = "1",
+                    };
+                }
+                else
+                {
+                    parm = new
+                    {
+                        output = "extend",
+                        select_hosts = "extend",
+                        monitored = "1",
+                        only_true = "1",
+                        sortfield = "lastchange",
+                        expandDescription = "1",
+                        maintenance = "0",
+                        min_severity = minSeverity,
+                        filter = new { value = "1" },
+                    };
+                }
+
+            }
+            else // API 1.4+
+            {
+                if (hideAck == 1)
+                {
+                    parm = new
+                    {
+                        output = "extend",
+                        selectHosts = "extend",
+                        monitored = "1",
+                        only_true = "1",
+                        sortfield = "lastchange",
+                        expandDescription = "1",
+                        maintenance = "0",
+                        min_severity = minSeverity,
+                        filter = new { value = "1" },
+                        withLastEventUnacknowledged = "1",
+                    };
+                }
+                else
+                {
+                    parm = new
+                    {
+                        output = "extend",
+                        selectHosts = "extend",
+                        monitored = "1",
+                        only_true = "1",
+                        sortfield = "lastchange",
+                        expandDescription = "1",
+                        maintenance = "0",
+                        min_severity = minSeverity,
+                        filter = new { value = "1" },
+                    };
+                }
+            }
+         
+            return parm;
+        }
+
         public void refreshTriggers()
         {
             getTriggers();
@@ -194,41 +271,8 @@ namespace Zabbix
         private void getTriggers()
         {
             long elapsedTicks;
-            var parms = new object { };
-            if (hideAck == 0)
-            {
-                parms = new
-                {
-                    output = "extend",
-                    select_hosts = "extend",
-                    monitored = "1",
-                    only_true = "1",
-                    sortfield = "lastchange",
-                    expandDescription = "1",
-                    maintenance = "0",
-                    min_severity = minSeverity,
-                    filter = new { value = "1" }
-                };
-            }
-            else
-            {
-                parms = new
-                {
-                    output = "extend",
-                    select_hosts = "extend",
-                    monitored = "1",
-                    only_true = "1",
-                    sortfield = "lastchange",
-                    expandDescription = "1",
-                    maintenance = "0",
-                    min_severity = minSeverity,
-                    filter = new { value = "1" },
-                    withLastEventUnacknowledged = "1"
-                };
-            }
-
             DateTime start = DateTime.Now;
-            triggers.getWithParam(parms);
+            triggers.getWithParam(getTriggerReqParams(hideAck));
             elapsedTicks = DateTime.Now.Ticks - start.Ticks;
 
             Update(new UpdateInfoMessage(this) { message = "getTriggers(" + hostgroupID + ") = " + triggers.Count().ToString(), status = "DEBUG" });
@@ -490,11 +534,12 @@ namespace Zabbix
             Params = new
             {
                 output = "extend",
-                select_hosts = "extend",
+                selectHosts = "extend",
                 monitored = "1",
                 templated = "0",
                 only_true = "1",
                 sortfield = "lastchange",
+                active = "1",
             };
         }
         public Triggers(ZabbixAPI Server) : base(Server) { }
@@ -514,7 +559,7 @@ namespace Zabbix
             base.getWithParams(p);
             foreach (Trigger tr in result)
             {
-                if (tr != null)
+                if (tr != null && tr.hosts != null)
                 {
                     tr.host = tr.hosts[0];
                 }
