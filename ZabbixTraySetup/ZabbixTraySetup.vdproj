@@ -149,6 +149,11 @@
             "AssemblyAsmDisplayName" = "8:ZabbixAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
+                    "_D4DD28B9C53433988F8AF424A2F04551"
+                    {
+                    "Name" = "8:ZabbixAPI.dll"
+                    "Attributes" = "3:512"
+                    }
                 }
             "SourcePath" = "8:ZabbixAPI.dll"
             "TargetName" = "8:"
@@ -176,7 +181,7 @@
         {
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_09446C4F1ED244449C6625ECBB61C936"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder][Manufacturer]\\[ProductName]"
+            "DefaultLocation" = "8:[ProgramFilesFolder]\\[ProductName]"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -225,7 +230,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ZabbixTray"
         "ProductCode" = "8:{8C51FE6E-D373-4842-9BB0-CB8B7E789DD4}"
-        "PackageCode" = "8:{F9D6092A-F77B-4B76-8A8A-050A0003B0B0}"
+        "PackageCode" = "8:{9DCC0807-7A29-4CDE-8B8B-5E97893CF12A}"
         "UpgradeCode" = "8:{E15243A9-37BE-4326-9131-A7EF6D19C822}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
@@ -233,7 +238,7 @@
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
         "ProductVersion" = "8:1.0.0"
-        "Manufacturer" = "8:Nikolay Popov"
+        "Manufacturer" = "8:ZabbixTray"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
         "Title" = "8:ZabbixTray"
@@ -746,7 +751,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_B13861FC296349D8B1E4D7C54F1D718E"
             {
-            "SourcePath" = "8:..\\obj\\Release\\ZabbixTray.exe"
+            "SourcePath" = "8:..\\obj\\Debug\\ZabbixTray.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_09446C4F1ED244449C6625ECBB61C936"
@@ -770,6 +775,7 @@
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
+                "ExcludeFilter" = "8:*.config"
                 }
             }
         }

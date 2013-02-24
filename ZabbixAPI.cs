@@ -8,6 +8,10 @@ using System.Threading;
 using System.Web.Script.Serialization;
 using System.IO;
 using System.Net;
+using System.Net.Security;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+
 
 // Borrowed heavily from the Open DotNet Zabbix library https://github.com/p1nger/ODZL
 
@@ -54,6 +58,14 @@ namespace Zabbix
             mainThread = new Thread(getInfo);
         }
 
+        public ConnectionInfo getConnectionParams()
+        {
+            var parms = new ConnectionInfo();
+            parms.url = _url;
+            parms.username = _username;
+            return parms;
+        }
+
         public void connect()
         {
             try
@@ -89,7 +101,7 @@ namespace Zabbix
         public bool login()
         {
             bool res = false;
-            onUpdate(new UpdateInfoMessage(this) { message = "Trying to authenticate", status = "LOGIN" });
+            onUpdate(new UpdateInfoMessage(this) { message = "Trying to authenticate at " + getConnectionParams().url, status = "LOGIN" });
             try
             {
                 var userinfo = new { user = _username, password = _password };
@@ -99,17 +111,17 @@ namespace Zabbix
                 {
                     res = false;
                     Update(new UpdateInfoMessage(this) { message = "Login failed", status = "LOGIN" });
-                    Alert("Login failed for user: " + _username);
+                    Alert("Login FAILED for " + getConnectionParams().username);
                 }
                 else
                 {
                     res = true;
-                    Update(new UpdateInfoMessage(this) { message = "Login was successful", status = "OK" });
+                    Update(new UpdateInfoMessage(this) { message = "Login OK for " + getConnectionParams().username, status = "OK" });
                 }
             }
             catch (Exception ex)
             {
-                Update(new UpdateInfoMessage(this) { message = "Authorization Error:" + ex.Message, status = "LOGIN" });
+                Update(new UpdateInfoMessage(this) { message = "Authentication Error:" + ex.Message, status = "LOGIN" });
                 res = false;
             }
 
@@ -164,7 +176,7 @@ namespace Zabbix
                 _apiVersion = (serializer.Deserialize<simpleresult>(result)).result;
                 return _apiVersion;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Alert("ApiVersion() exception: " + ex.Message);
                 return null;
@@ -259,7 +271,7 @@ namespace Zabbix
                     };
                 }
             }
-         
+
             return parm;
         }
 
@@ -275,7 +287,7 @@ namespace Zabbix
             triggers.getWithParam(getTriggerReqParams(hideAck));
             elapsedTicks = DateTime.Now.Ticks - start.Ticks;
 
-            Update(new UpdateInfoMessage(this) { message = "getTriggers(" + hostgroupID + ") = " + triggers.Count().ToString(), status = "DEBUG" });
+            // Update(new UpdateInfoMessage(this) { message = "getTriggers(" + hostgroupID + ") = " + triggers.Count().ToString(), status = "DEBUG" });
             Update(new UpdateInfoMessage(this) { message = elapsedTicks.ToString(), status = "TRIGGERS" });
         }
 
@@ -295,13 +307,51 @@ namespace Zabbix
             Update(new UpdateInfoMessage(this) { message = elapsedTicks.ToString(), status = "HOSTGROUPS" });
         }
 
+        private static bool _validateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors)
+        {
+            if (sslPolicyErrors == SslPolicyErrors.None)
+            {
+                return true;
+            }
+
+            bool enforceHashCheck = false; // @todo move this to configs
+            const byte[] apiCertHash = null; // @todo move this to configs
+
+            if (enforceHashCheck)
+            {
+                bool certMatch = false;
+                byte[] certHash = cert.GetCertHash();
+                if (certHash.Length == apiCertHash.Length)
+                {
+                    certMatch = true;
+                    for (int idx = 0; idx < certHash.Length; idx++)
+                    {
+                        if (certHash[idx] != apiCertHash[idx])
+                        {
+                            certMatch = false;
+                            break;
+                        }
+                    }
+                }
+                return certMatch;
+            }
+
+            bool relaxedSSLChecks = true; // @todo move this to configs
+            if (relaxedSSLChecks)
+            {
+                return true;
+            }
+            return false;
+        }
+
         private string GetWebRequest(string body)
         {
             string responseFromServer = string.Empty;
 
             try
             {
-                WebRequest wb = WebRequest.Create(_url);
+                ServicePointManager.ServerCertificateValidationCallback = _validateServerCertificate;
+                WebRequest wb = System.Net.WebRequest.Create(_url);
                 wb.ContentType = @"application/json-rpc";
                 wb.Credentials = CredentialCache.DefaultCredentials;
                 ASCIIEncoding encoding = new ASCIIEncoding();
@@ -321,7 +371,7 @@ namespace Zabbix
             {
                 Update(new UpdateInfoMessage(this) { message = ex.Message, status = "DEBUG" });
             }
-            
+
             return responseFromServer;
         }
         private Stream GetWebFile(string url)
@@ -357,7 +407,7 @@ namespace Zabbix
             Alert("request: \n" + qr);
             string result = GetWebRequest(qr);
             Alert("response: \n" + result);
-            return result; 
+            return result;
         }
 
         public void setHostgroupID(string id)
@@ -379,6 +429,12 @@ namespace Zabbix
         {
             hideAck = hide;
         }
+    }
+
+    public class ConnectionInfo
+    {
+        public string url;
+        public string username;
     }
 
     public class UpdateInfoMessage
@@ -421,11 +477,11 @@ namespace Zabbix
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             serializer.MaxJsonLength = 16777216;
-            server.Update(new UpdateInfoMessage(this) { message = "Sending request to server...", status = "INFO" });
+            // server.Update(new UpdateInfoMessage(this) { message = "Sending request to server...", status = "INFO" });
             lock (SyncRoot)
             {
                 stringResult = (server.CallAPI(method, Params));
-                server.Update(new UpdateInfoMessage(this) { message = "Processing query result...", status = "INFO" });
+                // server.Update(new UpdateInfoMessage(this) { message = "Processing query result...", status = "INFO" });
                 try
                 {
                     Result<T> myResult = serializer.Deserialize<Result<T>>(stringResult);
@@ -439,7 +495,9 @@ namespace Zabbix
                 if (error == null)
                 {
                     server.Update(new UpdateInfoMessage(this) { message = "", status = "INFO" });
-                } else {
+                }
+                else
+                {
                     server.Update(new UpdateInfoMessage(this) { message = "Error: " + error.data, status = "INFO" });
                 }
                 if (result == null)
@@ -453,11 +511,11 @@ namespace Zabbix
         {
             JavaScriptSerializer serializer = new JavaScriptSerializer();
             serializer.MaxJsonLength = 16777216;
-            server.Update(new UpdateInfoMessage(this) { message = "Sending request to server...", status = "INFO" });
+            // server.Update(new UpdateInfoMessage(this) { message = "Sending request to server...", status = "INFO" });
             lock (SyncRoot)
             {
                 stringResult = (server.CallAPI(method, p));
-                server.Update(new UpdateInfoMessage(this) { message = "Processing query result...", status = "INFO" });
+                // server.Update(new UpdateInfoMessage(this) { message = "Processing query result...", status = "INFO" });
                 try
                 {
                     Result<T> myResult = serializer.Deserialize<Result<T>>(stringResult);
@@ -633,7 +691,7 @@ namespace Zabbix
         public Host host { get; set; }
     }
 
-    public class HostGroups:Result<HostGroup>
+    public class HostGroups : Result<HostGroup>
     {
 
         protected override void init()

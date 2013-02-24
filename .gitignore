@@ -1,6 +1,7 @@
 
+*.suo
 bin/**
 obj/
 bin/Debug/*
 bin/Release/*
-*.suo
+ZabbixTraySetup/Debug/*

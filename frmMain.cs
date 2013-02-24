@@ -1,4 +1,5 @@
-﻿using System;
+﻿
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -74,10 +75,6 @@ namespace ZabbixTray
 
             loadSettings();
             setIcon(0);
-            lblCheckInterval.Text = checkInterval.ToString();
-            lblAlerts.Text = "";
-            lblLastCheck.Text = "";
-
             Connect();
         }
 
@@ -104,7 +101,6 @@ namespace ZabbixTray
             set
             {
                 checkInterval = value;
-                lblCheckInterval.Text = value.ToString();
                 if (zApi != null)
                 {
                     zApi.setInterval(checkInterval);
@@ -129,7 +125,8 @@ namespace ZabbixTray
 
         public bool ShowAck
         {
-            set {
+            set
+            {
                 showAck = value;
                 if (zApi != null)
                 {
@@ -246,7 +243,7 @@ namespace ZabbixTray
             }
         }
 
-        private void notifyIcon1_DoubleClick(object sender, EventArgs e)
+        private void notifyIcon1_Click(object sender, EventArgs e)
         {
             if (this.WindowState == FormWindowState.Minimized)
             {
@@ -328,8 +325,6 @@ namespace ZabbixTray
 
             if (dtTriggers == null)
             {
-                lblAlerts.BackColor = priorityToColor(0);
-                lblLastCheck.Text = "ERROR";
                 setIcon(0);
             }
             else
@@ -338,7 +333,6 @@ namespace ZabbixTray
                 dgvTriggers.DataSource = bsTriggers;
                 dgvTriggers.ClearSelection();
                 numAlerts = dgvTriggers.RowCount;
-                lblAlerts.Text = numAlerts.ToString();
 
                 for (int i = 0; i < dgvTriggers.RowCount; i++)
                 {
@@ -357,7 +351,6 @@ namespace ZabbixTray
 
                 if (numAlerts > 0)
                 {
-                    lblAlerts.BackColor = priorityToColor(highestPriority);
                     if (showPopup)
                     {
                         showBalloon();
@@ -366,17 +359,9 @@ namespace ZabbixTray
                 }
                 else
                 {
-                    lblAlerts.BackColor = priorityToColor(6);
                     setIcon(6);
                 }
-
-                lblLastCheck.Text = DateTime.Now.ToLocalTime().ToString();
-
-                
             }
-
-            lblMinPriority.Text = getPriorityValue(minPriority);
-            lblMinPriority.BackColor = priorityToColor(minPriority);
         }
 
         public int getPriorityKey(string val)
@@ -465,6 +450,19 @@ namespace ZabbixTray
             restoreMe();
         }
 
+        private void ConnectCallback(ZabbixAPI zAPI)
+        {
+            if (zAPI == null)
+            {
+                this.Text = "ZabbixTray - NOT CONNECTED";
+            }
+            else
+            {
+                ConnectionInfo connParms = zAPI.getConnectionParams();
+                this.Text = "ZabbixTray - " + connParms.username + '@' + connParms.url;
+            }
+        }
+
         private void Connect()
         {
             if (zApi != null)
@@ -472,21 +470,24 @@ namespace ZabbixTray
                 zApi.stop();
             }
             Debug("Creating API connection");
-            zApi = new ZabbixAPI(apiURL, apiUsername, apiPassword);
-            zApi.onUpdate += updateInfo;
-            this.Cursor = Cursors.WaitCursor;
-            zApi.setMinSeverity(minPriority.ToString());
-            zApi.setInterval(checkInterval);
-            if (showAck)
+            if (apiURL != null && apiUsername != null && apiPassword != null)
             {
-                zApi.setHideAck(0);
+                zApi = new ZabbixAPI(apiURL, apiUsername, apiPassword);
+                zApi.onUpdate += updateInfo;
+                this.Cursor = Cursors.WaitCursor;
+                zApi.setMinSeverity(minPriority.ToString());
+                zApi.setInterval(checkInterval);
+                if (showAck)
+                {
+                    zApi.setHideAck(0);
+                }
+                else
+                {
+                    zApi.setHideAck(1);
+                }
+                zApi.connect();
             }
-            else
-            {
-                zApi.setHideAck(1);
-            }
-            zApi.connect();
-            lblAPIVersion.Text = "API Version: " + zApi.ApiVersion();
+            ConnectCallback(zApi);
         }
 
         private void Disconnect()
@@ -527,7 +528,7 @@ namespace ZabbixTray
                         {
                             long ticks = long.Parse(info.message);
                             double ms = ticks / 10000;
-                            Debug("Triggers fetched in: " + ms.ToString() + "ms");
+                            // Debug("Triggers fetched in: " + ms.ToString() + "ms");
                             updateAlerts();
                         }));
                         break;
@@ -536,7 +537,7 @@ namespace ZabbixTray
                         {
                             long ticks = long.Parse(info.message);
                             double ms = ticks / 10000;
-                            Debug("Hosts fetched in: " + ms.ToString() + "ms");
+                            // Debug("Hosts fetched in: " + ms.ToString() + "ms");
                         }));
                         break;
                     case "REFRESH":
@@ -544,8 +545,11 @@ namespace ZabbixTray
                     default:
                         this.Invoke(new simplefunc(() =>
                         {
-                            tssMessage.Text = info.message;
-                            Debug(info.message);
+                            if (info.message != null && info.message.Length > 0)
+                            {
+                                tssMessage.Text = info.message;
+                                Debug(info.message);
+                            }
                         }));
                         break;
                 }
@@ -560,11 +564,6 @@ namespace ZabbixTray
             tbDebug.Text = temp;
             tbDebug.SelectionStart = tbDebug.Text.Length;
             tbDebug.ScrollToCaret();
-        }
-
-        private void dgvTriggers_CellContentClick(object sender, DataGridViewCellEventArgs e)
-        {
-
         }
     }
 }
