@@ -1,5 +1,6 @@
 ﻿
 using System;
+using System.Configuration;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,10 +9,8 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using System.Reflection;
-using Ini;
+
 using Zabbix;
-using System.IO;
 
 namespace ZabbixTray
 {
@@ -43,7 +42,7 @@ namespace ZabbixTray
         private Hashtable priorityValues = new Hashtable();
         private Hashtable priorityColors = new Hashtable();
         private DataGridViewCellStyle[] cellStyles = new DataGridViewCellStyle[6];
-        private string exePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+        private Config config = new Config();
         #endregion
 
         public frmMain()
@@ -151,82 +150,45 @@ namespace ZabbixTray
 
         private void loadSettings()
         {
-            if (!File.Exists(exePath + "\\ZabbixTray.ini"))
-            {
-                return;
-            }
+            Config.ZabbixServerConfig zabbixServerConfig = config.getZabbixServerConfig();
 
-            IniFile ini = new IniFile(exePath + "\\ZabbixTray.ini");
-            apiURL = ini.IniReadValue("Options", "apiURL");
-            apiUsername = ini.IniReadValue("Options", "apiUsername");
-            apiPassword = ini.IniReadValue("Options", "apiPassword");
+            apiURL = zabbixServerConfig.Url;
+            apiUsername = zabbixServerConfig.Username;
+            apiPassword = zabbixServerConfig.Password;
+            checkInterval = zabbixServerConfig.PollInterval;
+            minPriority = zabbixServerConfig.MinPriority;
+            showAck = zabbixServerConfig.ShowAck;
+            showPopup = zabbixServerConfig.ShowPopup;
 
-            try
+            if (zApi != null)
             {
-                checkInterval = Int32.Parse(ini.IniReadValue("Options", "checkInterval"));
-                if (zApi != null)
+                zApi.setMinSeverity(minPriority.ToString());
+                zApi.setInterval(checkInterval);
+                if (showAck)
                 {
-                    zApi.setInterval(checkInterval);
+                    zApi.setHideAck(0);
+                }
+                else
+                {
+                    zApi.setHideAck(1);
                 }
             }
-            catch (Exception ex)
-            {
-                Debug("Error parsing checkInterval: " + ex.Message);
-            }
 
-            try
-            {
-                minPriority = Int32.Parse(ini.IniReadValue("Options", "minPriority"));
-                if (zApi != null)
-                {
-                    zApi.setMinSeverity(minPriority.ToString());
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug("Error parsing minPriority: " + ex.Message);
-            }
-
-            try
-            {
-                showAck = bool.Parse(ini.IniReadValue("Options", "showAck"));
-                if (zApi != null)
-                {
-                    if (showAck)
-                    {
-                        zApi.setHideAck(0);
-                    }
-                    else
-                    {
-                        zApi.setHideAck(1);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Debug("Error parsing showAck: " + ex.Message);
-            }
-
-            try
-            {
-                showPopup = bool.Parse(ini.IniReadValue("Options", "showPopup"));
-            }
-            catch (Exception ex)
-            {
-                Debug("Error parsing showPopup: " + ex.Message);
-            }
         }
 
         public void saveSettings()
         {
-            IniFile ini = new IniFile(exePath + "\\ZabbixTray.ini");
-            ini.IniWriteValue("Options", "apiURL", apiURL);
-            ini.IniWriteValue("Options", "apiUsername", apiUsername);
-            ini.IniWriteValue("Options", "apiPassword", apiPassword);
-            ini.IniWriteValue("Options", "checkInterval", checkInterval.ToString());
-            ini.IniWriteValue("Options", "minPriority", minPriority.ToString());
-            ini.IniWriteValue("Options", "showAck", showAck.ToString());
-            ini.IniWriteValue("Options", "showPopup", showPopup.ToString());
+            Config.ZabbixServerConfig zabbixServerConfig = new Config.ZabbixServerConfig();
+            zabbixServerConfig.Url = apiURL;
+            zabbixServerConfig.Username = apiUsername;
+            zabbixServerConfig.Password = apiPassword;
+            zabbixServerConfig.PollInterval = checkInterval;
+            zabbixServerConfig.MinPriority = minPriority;
+            zabbixServerConfig.ShowAck = showAck;
+            zabbixServerConfig.ShowPopup = showPopup;
+            config.appConfig.Sections.Remove("ZabbixServer");
+            config.appConfig.Sections.Add("ZabbixServer", zabbixServerConfig);
+            config.saveConfig();
         }
 
         private void setIcon(int p)
