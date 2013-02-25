@@ -55,8 +55,6 @@ namespace ZabbixTray
             {
                 get
                 {
-                    // byte[] apiPasswordDecrypted = ProtectedData.Unprotect(this["password"], null, DataProtectionScope.CurrentUser);
-                    // apiPassword = System.Text.Encoding.UTF8.GetString(apiPasswordDecrypted);
                     byte[] passwordEncrypted = Convert.FromBase64String((string)this["password"]);
                     byte[] passwordDecrypted = ProtectedData.Unprotect(passwordEncrypted, null, DataProtectionScope.CurrentUser);
                     return (string)System.Text.Encoding.UTF8.GetString(passwordDecrypted);
