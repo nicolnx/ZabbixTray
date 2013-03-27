@@ -1,4 +1,3 @@
-
 *.suo
 bin/**
 obj/
@@ -7,4 +6,4 @@ bin/Release/*
 ZabbixTraySetup/Debug/*
 release/setup.exe
 .ZabbixTray
-_UpgradeReport_Files/*
+
