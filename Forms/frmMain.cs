@@ -248,7 +248,7 @@ namespace ZabbixTray
 
         private void updateAlerts(ZabbixAPI zApi)
         {
-            if (zApi != null && zApi.triggers[0] != null && zApi.triggers.Count() > 0)
+            if (zApi != null)
             {
                 string serverName = zApi.getConnectionParams().serverName;
 
@@ -326,6 +326,7 @@ namespace ZabbixTray
             if (dtTriggers == null || dtTriggers.Rows.Count == 0)
             {
                 setIcons(0);
+                numAlerts = 0;
             }
             else
             {

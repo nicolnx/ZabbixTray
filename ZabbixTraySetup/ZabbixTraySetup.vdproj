@@ -198,7 +198,7 @@
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ZabbixAPI, Version=1.0.4834.8287, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:ZabbixAPI, Version=1.0.0.31981, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_D4DD28B9C53433988F8AF424A2F04551"
@@ -303,15 +303,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ZabbixTray"
-        "ProductCode" = "8:{6494CCCA-A44A-49DF-AE5D-CCC97A0B2790}"
-        "PackageCode" = "8:{1A078538-9C28-4BBE-80D2-49C08FA8BBD5}"
+        "ProductCode" = "8:{565D7CDC-C634-4036-BB19-8E5B26B014DA}"
+        "PackageCode" = "8:{45027D0F-1A3D-44E9-B73E-833DA5A4CA40}"
         "UpgradeCode" = "8:{E15243A9-37BE-4326-9131-A7EF6D19C822}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.1"
+        "ProductVersion" = "8:1.0.2"
         "Manufacturer" = "8:ZabbixTray"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
