@@ -1,19 +1,21 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿/**
+ * Zabbix API Classes
+ * Borrowed heavily from the Open DotNet Zabbix library https://github.com/p1nger/ODZL
+ */
+
+using System;
 using System.Linq;
 using System.Text;
-using System.Threading;
-using System.Web.Script.Serialization;
 using System.IO;
 using System.Net;
 using System.Net.Security;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-
-
-// Borrowed heavily from the Open DotNet Zabbix library https://github.com/p1nger/ODZL
+using System.Threading;
+using System.Web.Script.Serialization;
 
 namespace Zabbix
 {
@@ -23,20 +25,24 @@ namespace Zabbix
     public class ZabbixAPI
     {
         #region Private section
-        private string authHash = "";
+        
         private int id = 0;
         private string _url;
         private string _username;
         private string _password;
+        private string _serverName;
         private string hostgroupID;
         private string minSeverity = "0";
-        private JavaScriptSerializer serializer = new JavaScriptSerializer();
         private int sleep = 5000;
         private int hideAck = 0;
         private string _apiVersion;
+        private string authHash = "";
+        private JavaScriptSerializer serializer = new JavaScriptSerializer();
+        
         #endregion
 
         #region Public section
+
         public AlertEvent onAlert { get; set; }
         public ThreadEvent onUpdate { get; set; }
         public Thread mainThread;
@@ -44,14 +50,16 @@ namespace Zabbix
         public HostGroups hostgroups;
         public Triggers triggers;
         public Events events;
+
         #endregion
 
-        public ZabbixAPI(string url, string user, string pass)
+        public ZabbixAPI(string url, string user, string pass, string serverName)
         {
             serializer.MaxJsonLength = 16777216;
             _url = url;
             _username = user;
             _password = pass;
+            _serverName = serverName;
             triggers = new Triggers(this);
             hosts = new Hosts(this);
             hostgroups = new HostGroups(this);
@@ -63,6 +71,7 @@ namespace Zabbix
             var parms = new ConnectionInfo();
             parms.url = _url;
             parms.username = _username;
+            parms.serverName = _serverName;
             return parms;
         }
 
@@ -101,30 +110,39 @@ namespace Zabbix
         public bool login()
         {
             bool res = false;
-            onUpdate(new UpdateInfoMessage(this) { message = "Trying to authenticate at " + getConnectionParams().url, status = "LOGIN" });
-            try
+            ConnectionInfo connParams = getConnectionParams();
+            if (connParams.url != null)
             {
-                var userinfo = new { user = _username, password = _password };
-                string result = CallAPI("user.authenticate", userinfo);
-                authHash = (serializer.Deserialize<simpleresult>(result)).result;
-                if (authHash == null)
+                string msgText = String.Format("Trying to authenticate at {0}", this._serverName);
+                UpdateInfoMessage message = new UpdateInfoMessage(this, "LOGIN", msgText);
+                Update(message);
+                try
                 {
+                    var userinfo = new { user = _username, password = _password };
+                    string result = CallAPI("user.authenticate", userinfo);
+                    authHash = (serializer.Deserialize<ResultString>(result)).result;
+                    if (authHash == null)
+                    {
+                        res = false;
+                        msgText = String.Format("Login failed at {0}", this._serverName);
+                        Update(new UpdateInfoMessage(this) { message = msgText, status = "LOGIN" });
+                        Alert(msgText);
+                    }
+                    else
+                    {
+                        res = true;
+                        msgText = String.Format("Login OK as {0} at {1}", connParams.username, this._serverName);
+                        Update(new UpdateInfoMessage(this) { message = msgText, status = "OK" });
+                        Update(new UpdateInfoMessage(this) { message = msgText, status = "LOGIN" });
+                    }
+                }
+                catch
+                {
+                    msgText = String.Format("Authentication Error on {0}", this._serverName);
+                    Update(new UpdateInfoMessage(this) { message = msgText, status = "LOGIN" });
                     res = false;
-                    Update(new UpdateInfoMessage(this) { message = "Login failed", status = "LOGIN" });
-                    Alert("Login FAILED for " + getConnectionParams().username);
-                }
-                else
-                {
-                    res = true;
-                    Update(new UpdateInfoMessage(this) { message = "Login OK for " + getConnectionParams().username, status = "OK" });
                 }
             }
-            catch (Exception ex)
-            {
-                Update(new UpdateInfoMessage(this) { message = "Authentication Error:" + ex.Message, status = "LOGIN" });
-                res = false;
-            }
-
             return res;
         }
 
@@ -173,7 +191,7 @@ namespace Zabbix
             string result = CallAPI("apiinfo.version", null);
             try
             {
-                _apiVersion = (serializer.Deserialize<simpleresult>(result)).result;
+                _apiVersion = (serializer.Deserialize<ResultString>(result)).result;
                 return _apiVersion;
             }
             catch (Exception ex)
@@ -286,8 +304,6 @@ namespace Zabbix
             DateTime start = DateTime.Now;
             triggers.getWithParam(getTriggerReqParams(hideAck));
             elapsedTicks = DateTime.Now.Ticks - start.Ticks;
-
-            // Update(new UpdateInfoMessage(this) { message = "getTriggers(" + hostgroupID + ") = " + triggers.Count().ToString(), status = "DEBUG" });
             Update(new UpdateInfoMessage(this) { message = elapsedTicks.ToString(), status = "TRIGGERS" });
         }
 
@@ -314,19 +330,19 @@ namespace Zabbix
                 return true;
             }
 
-            bool enforceHashCheck = false; // @todo move this to configs
-            const byte[] apiCertHash = null; // @todo move this to configs
+            bool enforceSSLHashCheck = false; // @todo move this to configs
+            const byte[] apiSSLCertHash = null; // @todo move this to configs
 
-            if (enforceHashCheck)
+            if (enforceSSLHashCheck)
             {
                 bool certMatch = false;
                 byte[] certHash = cert.GetCertHash();
-                if (certHash.Length == apiCertHash.Length)
+                if (certHash.Length == apiSSLCertHash.Length)
                 {
                     certMatch = true;
                     for (int idx = 0; idx < certHash.Length; idx++)
                     {
-                        if (certHash[idx] != apiCertHash[idx])
+                        if (certHash[idx] != apiSSLCertHash[idx])
                         {
                             certMatch = false;
                             break;
@@ -435,6 +451,7 @@ namespace Zabbix
     {
         public string url;
         public string username;
+        public string serverName;
     }
 
     public class UpdateInfoMessage
@@ -442,6 +459,7 @@ namespace Zabbix
         public string status { get; set; }
         public string message { get; set; }
         public object sender { get; set; }
+
         public UpdateInfoMessage(object Sender, string Status = "", string Message = "")
         {
             status = Status;
@@ -459,6 +477,7 @@ namespace Zabbix
         public string stringResult;
         public object SyncRoot;
         public Error error;
+
         protected virtual void init() { }
 
         public Result(ZabbixAPI Server)
@@ -579,7 +598,7 @@ namespace Zabbix
         public string data;
     }
 
-    public class simpleresult
+    public class ResultString
     {
         public string result;
     }
@@ -600,7 +619,9 @@ namespace Zabbix
                 active = "1",
             };
         }
+
         public Triggers(ZabbixAPI Server) : base(Server) { }
+
         public override void get()
         {
             base.get();
@@ -612,6 +633,7 @@ namespace Zabbix
                 }
             }
         }
+
         public void getWithParam(object p)
         {
             base.getWithParams(p);
@@ -623,6 +645,7 @@ namespace Zabbix
                 }
             }
         }
+
         public List<Trigger> getByHostid(String hostid)
         {
             var q = from res in result
@@ -631,10 +654,12 @@ namespace Zabbix
             List<Trigger> trgs = new List<Trigger>(q);
             return trgs;
         }
+
         public void refresh()
         {
             get();
         }
+
     }
 
     public class Hosts : Result<Host>
@@ -714,6 +739,7 @@ namespace Zabbix
         public HostGroups(ZabbixAPI Server) : base(Server) { }
 
     }
+
     public class HostGroup
     {
         public string groupid;

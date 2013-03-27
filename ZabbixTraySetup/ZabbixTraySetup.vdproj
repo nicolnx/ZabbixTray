@@ -15,6 +15,18 @@
     {
         "Entry"
         {
+        "MsmKey" = "8:_19CBDC1A838046B4BD8D61B34A0A3307"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_AA3336FC359248C984A09D3820542BBC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_B13861FC296349D8B1E4D7C54F1D718E"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -82,7 +94,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:..\\release\\ZabbixTraySetup.msi"
+        "OutputFilename" = "8:..\\Release\\ZabbixTraySetup.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -142,11 +154,51 @@
         }
         "File"
         {
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_19CBDC1A838046B4BD8D61B34A0A3307"
+            {
+            "SourcePath" = "8:..\\Resources\\Icons\\icon_normal.ico"
+            "TargetName" = "8:icon_normal.ico"
+            "Tag" = "8:"
+            "Folder" = "8:_09446C4F1ED244449C6625ECBB61C936"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_AA3336FC359248C984A09D3820542BBC"
+            {
+            "SourcePath" = "8:..\\Resources\\Sounds\\warning.wav"
+            "TargetName" = "8:warning.wav"
+            "Tag" = "8:"
+            "Folder" = "8:_148923604D464B4AA24CDE6892B7D7F5"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D4DD28B9C53433988F8AF424A2F04551"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:ZabbixAPI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL"
+            "AssemblyAsmDisplayName" = "8:ZabbixAPI, Version=1.0.4834.8287, Culture=neutral, processorArchitecture=MSIL"
                 "ScatterAssemblies"
                 {
                     "_D4DD28B9C53433988F8AF424A2F04551"
@@ -189,6 +241,17 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_148923604D464B4AA24CDE6892B7D7F5"
+                    {
+                    "Name" = "8:Sounds"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_EB77F412B6084A0BAE310B65B9B4A73B"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_7320D2C6C8A74E75A2A599D531921654"
@@ -211,6 +274,17 @@
             "Property" = "8:ProgramMenuFolder"
                 "Folders"
                 {
+                    "{9EF0B969-E518-4E46-987F-47570745A589}:_ABA32EF596A048658362CC786EF4452B"
+                    {
+                    "Name" = "8:ZabbixTray"
+                    "AlwaysCreate" = "11:FALSE"
+                    "Condition" = "8:"
+                    "Transitive" = "11:FALSE"
+                    "Property" = "8:_9FE9860ACAF04885BF8FB7B15AFB419F"
+                        "Folders"
+                        {
+                        }
+                    }
                 }
             }
         }
@@ -229,15 +303,15 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:ZabbixTray"
-        "ProductCode" = "8:{8C51FE6E-D373-4842-9BB0-CB8B7E789DD4}"
-        "PackageCode" = "8:{9DCC0807-7A29-4CDE-8B8B-5E97893CF12A}"
+        "ProductCode" = "8:{6494CCCA-A44A-49DF-AE5D-CCC97A0B2790}"
+        "PackageCode" = "8:{1A078538-9C28-4BBE-80D2-49C08FA8BBD5}"
         "UpgradeCode" = "8:{E15243A9-37BE-4326-9131-A7EF6D19C822}"
         "AspNetVersion" = "8:4.0.30319.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:ZabbixTray"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
@@ -247,7 +321,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:Zabbix Tray Utility"
         "ARPURLINFOABOUT" = "8:http://github.com/nicolnx/ZabbitTray"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_19CBDC1A838046B4BD8D61B34A0A3307"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
@@ -350,6 +424,20 @@
         }
         "Shortcut"
         {
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_166750DDD238424EAD3EBE8235EC3787"
+            {
+            "Name" = "8:Zabbix Tray"
+            "Arguments" = "8:"
+            "Description" = "8:"
+            "ShowCmd" = "3:1"
+            "IconIndex" = "3:0"
+            "Transitive" = "11:FALSE"
+            "Target" = "8:_B13861FC296349D8B1E4D7C54F1D718E"
+            "Folder" = "8:_ABA32EF596A048658362CC786EF4452B"
+            "WorkingFolder" = "8:_09446C4F1ED244449C6625ECBB61C936"
+            "Icon" = "8:_19CBDC1A838046B4BD8D61B34A0A3307"
+            "Feature" = "8:"
+            }
         }
         "UserInterface"
         {
